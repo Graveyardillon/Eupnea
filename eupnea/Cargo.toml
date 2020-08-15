@@ -1,0 +1,12 @@
+[package]
+name = "eupnea"
+version = "0.1.0"
+authors = ["Papillon6814 <41826375+Papillon6814@users.noreply.github.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rocket = "0.4"
+rocket_contrib = { version = "0.4", features = ["json"] }
+m3u8-rs = "1.0.6"
