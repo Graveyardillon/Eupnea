@@ -112,7 +112,7 @@ impl Playlist {
         let mut segment = MediaSegment::empty();
         segment.duration = 40.0;
         segment.title = Some("".into());
-        segment.uri = "assets/sample.ts".to_string();
+        segment.uri = "sample.ts".to_string();
     
         self.playlist.segments.push(segment);
         self.playlist.media_sequence = 1;
