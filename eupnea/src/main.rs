@@ -28,7 +28,7 @@ fn play_file<'r>(file_name: String) -> Response<'r> {
         Ok(file) => {
             let response = Response::build()
                 .status(Status::Ok)
-                .header(ContentType::new("video", "MP2T"))
+                .header(ContentType::new("application", "x-mpegURL"))
                 .raw_header("Accept-Ranges", "bytes")
                 .raw_header("Connection", "keep-alive")
                 .sized_body(Cursor::new(file))
@@ -95,7 +95,7 @@ impl Playlist {
     fn new() -> Self {
         let mut playlist = MediaPlaylist::default();
         playlist.version = 3;
-        playlist.target_duration = 6.0;
+        playlist.target_duration = 60.0;
         playlist.media_sequence = 0;
 
         let mut master_playlist = MasterPlaylist::default();
@@ -139,7 +139,7 @@ impl Playlist {
         variant_stream.is_i_frame = false;
         variant_stream.uri = "playlist.m3u8".to_string();
         variant_stream.alternatives.push(alt_media);
-        variant_stream.bandwidth = "777777".to_string();
+        variant_stream.bandwidth = "7777777".to_string();
 
         self.master_playlist.variants.push(variant_stream);
 
