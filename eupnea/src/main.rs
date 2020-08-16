@@ -13,6 +13,7 @@ use m3u8_rs::playlist::{
     MediaSegment,
     VariantStream,
     AlternativeMedia,
+    AlternativeMediaType,
 };
 use rocket::http::{ContentType, Status};
 use rocket::response::Response;
@@ -50,7 +51,7 @@ fn play_file<'r>(file_name: String) -> Response<'r> {
 #[get("/stream/playlist.m3u8")]
 fn stream<'r>() -> Response<'r> {
     println!("stream called");
-    let path = "./assets/playlist.m3u8";
+    let path = "./assets/master_playlist.m3u8";
     let filepath = PathBuf::from(path);
 
     match fs::read(&filepath) {
@@ -99,7 +100,7 @@ impl Playlist {
         playlist.media_sequence = 0;
 
         let mut master_playlist = MasterPlaylist::default();
-        master_playlist.version = 6;
+        master_playlist.version = 3;
 
         Self {
             master_playlist: master_playlist,
@@ -133,13 +134,15 @@ impl Playlist {
     fn add_master_playlist(&mut self) {
         let mut alt_media = AlternativeMedia::default();
         //alt_media.uri = Some("playlist.m3u8".to_string());
+        alt_media.media_type = AlternativeMediaType::Video;
         alt_media.group_id = "1".to_string();
+        alt_media.name = "sample".to_string();
 
         let mut variant_stream = VariantStream::default();
         variant_stream.is_i_frame = false;
-        variant_stream.uri = "playlist.m3u8".to_string();
+        variant_stream.uri = "http://localhost:8001/stream/media/playlist.m3u8".to_string();
         variant_stream.alternatives.push(alt_media);
-        variant_stream.bandwidth = "7777777".to_string();
+        variant_stream.bandwidth = "640000".to_string();
 
         self.master_playlist.variants.push(variant_stream);
 
