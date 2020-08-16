@@ -4,6 +4,7 @@ extern crate m3u8_rs;
 #[macro_use]
 extern crate rocket;
 
+use std::io::Cursor;
 use std::fs;
 use std::path::PathBuf;
 use m3u8_rs::playlist::{
@@ -13,34 +14,64 @@ use m3u8_rs::playlist::{
     VariantStream,
     AlternativeMedia,
 };
-use rocket::response::content::Content;
-use rocket::http::ContentType;
+use rocket::http::{ContentType, Status};
+use rocket::response::Response;
 use tempfile;
 
-#[get("/playlist.m3u8")]
-fn play_file() -> Vec<u8> {
-    let path = "./assets/playlist.m3u8";
+#[get("/stream/media/<file_name>")]
+fn play_file<'r>(file_name: String) -> Response<'r> {
+    println!("play_file called");
+    let path = format!("./assets/{}", file_name);
     let filepath = PathBuf::from(path);
 
     match fs::read(&filepath) {
-        Ok(file) => file,
+        Ok(file) => {
+            let response = Response::build()
+                .status(Status::Ok)
+                .header(ContentType::new("video", "MP2T"))
+                .raw_header("Accept-Ranges", "bytes")
+                .raw_header("Connection", "keep-alive")
+                .sized_body(Cursor::new(file))
+                .finalize();
+            response
+        },
         Err(e) => {
             println!("{}", e);
-            Vec::new()
+            let response = Response::build()
+                .status(Status::Ok)
+                .header(ContentType::Plain)
+                .sized_body(Cursor::new("Error"))
+                .finalize();
+            response
         }
     }
 }
 
 #[get("/stream/playlist.m3u8")]
-fn stream() -> Content<Vec<u8>> {
-    let path = "./assets/master_playlist.m3u8";
+fn stream<'r>() -> Response<'r> {
+    println!("stream called");
+    let path = "./assets/playlist.m3u8";
     let filepath = PathBuf::from(path);
 
     match fs::read(&filepath) {
-        Ok(file) => Content(ContentType::MPEG, file),
+        Ok(file) => {
+            let response = Response::build()
+                .status(Status::Ok)
+                .header(ContentType::new("application", "x-mpegURL"))
+                .raw_header("Accept-Ranges", "bytes")
+                .raw_header("Connection", "keep-alive")
+                .sized_body(Cursor::new(file))
+                .finalize();
+            response
+        },
         Err(e) => {
             println!("{}", e);
-            Content(ContentType::MPEG, Vec::new())
+            let response = Response::build()
+                .status(Status::Ok)
+                .header(ContentType::Plain)
+                .sized_body(Cursor::new("Error"))
+                .finalize();
+            response
         }
     }
 }
@@ -81,9 +112,10 @@ impl Playlist {
         let mut segment = MediaSegment::empty();
         segment.duration = 40.0;
         segment.title = Some("".into());
-        segment.uri = "sample.ts".to_string();
+        segment.uri = "assets/sample.ts".to_string();
     
         self.playlist.segments.push(segment);
+        self.playlist.media_sequence = 1;
 
         let hls_root = PathBuf::from("./assets");
 

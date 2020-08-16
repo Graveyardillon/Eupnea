@@ -1,5 +1,6 @@
 #EXTM3U
 #EXT-X-VERSION:3
 #EXT-X-TARGETDURATION:6
+#EXT-X-MEDIA-SEQUENCE:1
 #EXTINF:40,
-sample.ts
+assets/sample.ts
